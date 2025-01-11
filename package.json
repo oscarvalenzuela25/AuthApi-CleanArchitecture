@@ -1,0 +1,27 @@
+{
+  "name": "auth",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "rimraf ./dist && tsc",
+    "start": "npm run build && node dist/app.js",
+    "devel": "nodemon src/app.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.5",
+    "nodemon": "^3.1.9",
+    "rimraf": "^5.0.10",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "env-var": "^7.5.0",
+    "express": "^4.21.2"
+  }
+}
