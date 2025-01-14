@@ -44,3 +44,6 @@ jspm_packages/
 dist/
 build/
 out/
+
+# Mongo
+mongo/

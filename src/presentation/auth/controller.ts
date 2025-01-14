@@ -1,22 +1,48 @@
-import { Request, Response } from "express";
-import { RegisterUserDTO } from "../../domain/DTO/auth/registerUserDTO";
-import { AuthRepository } from "../../domain/repositories/authRepostory";
+import { Request, Response } from 'express';
+import { RegisterUserDTO } from '../../domain/DTO/auth/registerUserDTO';
+import { UserModel } from '../../data/mongodb/models/userModel';
+import { RegisterUseCase } from './../../application/useCases/auth/registerUseCase';
+import { Errors } from '../../config/errors';
+import { LoginUserDTO } from '../../domain/DTO/auth/loginUserDTO';
+import { LoginUseCase } from './../../application/useCases/auth/loginUseCase';
 
 export class AuthController {
-  constructor(private authRepositoryImp: AuthRepository) {}
+  constructor(
+    private registerUseCase: RegisterUseCase,
+    private loginUseCase: LoginUseCase
+  ) {}
 
-  public registerUser(req: Request, res: Response) {
-    const [error, user] = RegisterUserDTO.create(req.body);
-    if (!error) {
-      this.authRepositoryImp
-        .register(user!)
-        .then(newUser => res.status(200).json(newUser));
-    } else {
-      res.status(404).json({ error });
+  async registerUser(req: Request, res: Response) {
+    try {
+      const [error, user] = RegisterUserDTO.create(req.body);
+      if (error) res.status(404).json({ error });
+
+      const response = user && (await this.registerUseCase.execute(user));
+      res.status(200).json(response);
+    } catch (error) {
+      Errors.handleError(error, res);
     }
   }
 
-  loginUser(req: Request, res: Response) {
-    res.json("Login");
+  async loginUser(req: Request, res: Response) {
+    try {
+      const [error, user] = LoginUserDTO.execute(req.body);
+      if (error) res.status(404).json({ error });
+
+      const response = user && (await this.loginUseCase.execute(user));
+      res.status(200).json(response);
+    } catch (error) {
+      Errors.handleError(error, res);
+    }
+  }
+
+  async getUsers(req: Request, res: Response) {
+    const users = await UserModel.find();
+    res.status(200).json({ users });
+  }
+
+  async getUser(req: Request, res: Response) {
+    const user = req.body.client;
+    res.status(200).json(user);
   }
 }

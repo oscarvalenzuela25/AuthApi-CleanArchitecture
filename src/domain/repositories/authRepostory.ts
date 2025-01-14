@@ -1,8 +1,7 @@
-import { LoginUserDTO } from "../DTO/auth/loginUserDTO";
-import { RegisterUserDTO } from "../DTO/auth/registerUserDTO";
-import { UserEntity } from "../entities/userEntity";
+import { UserEntity } from '../entities/userEntity';
 
 export abstract class AuthRepository {
-  abstract login(loginUserDTO: LoginUserDTO): Promise<UserEntity>;
-  abstract register(registerUserDto: RegisterUserDTO): Promise<UserEntity>;
+  abstract createUser(user: Partial<UserEntity>): Promise<UserEntity>;
+  abstract findUser(where: Record<string, any>): Promise<UserEntity | null>;
+  abstract findUsers(where: Record<string, any>): Promise<UserEntity[]>;
 }

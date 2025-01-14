@@ -1,31 +1,34 @@
-import { AuthDatasource } from "../../domain/datasources/authDatasource";
-import { LoginUserDTO } from "../../domain/DTO/auth/loginUserDTO";
-import { RegisterUserDTO } from "../../domain/DTO/auth/registerUserDTO";
-import { UserEntity } from "../../domain/entities/userEntity";
-import { CustomError } from "../../domain/errors/customError";
+import { UserModel } from '../../data/mongodb/models/userModel';
+import { AuthDatasource } from '../../domain/datasources/authDatasource';
+import { UserEntity } from '../../domain/entities/userEntity';
+import { CustomError } from '../../domain/errors/customError';
+import { UserMapper } from '../mappers/userMapper';
 
 export class AuthDatasourceImplementation implements AuthDatasource {
-  async register(registerUserDTO: RegisterUserDTO): Promise<UserEntity> {
-    const { name, email, password } = registerUserDTO;
-
+  async createUser(user: Partial<UserEntity>): Promise<UserEntity> {
     try {
-      return new UserEntity(1, name, email, password, ["ADMIN_ROLE"]);
+      const newUser = await UserModel.create(user);
+      await newUser.save();
+      return UserMapper.userEntityFromObject(newUser);
     } catch (error) {
-      if (error instanceof CustomError) {
-        throw error;
-      }
       throw CustomError.internalServerError();
     }
   }
 
-  async login(loginUserDTO: LoginUserDTO): Promise<UserEntity> {
-    const { email, password } = loginUserDTO;
+  async findUser(where: Record<string, any>): Promise<UserEntity | null> {
     try {
-      return new UserEntity(1, "name", email, password, ["ADMIN_ROLE"]);
+      const user = await UserModel.findOne(where);
+      return user ? UserMapper.userEntityFromObject(user) : null;
     } catch (error) {
-      if (error instanceof CustomError) {
-        throw error;
-      }
+      throw CustomError.internalServerError();
+    }
+  }
+
+  async findUsers(where: Record<string, any>): Promise<UserEntity[]> {
+    try {
+      const users = await UserModel.find(where);
+      return users.map(user => UserMapper.userEntityFromObject(user));
+    } catch (error) {
       throw CustomError.internalServerError();
     }
   }
